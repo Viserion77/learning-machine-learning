@@ -1,81 +1,93 @@
 function sigmoid(x) {
     return 1 / (1 + Math.exp(-x));
 }
-function derivadaSigmoid(x) {
-    return x * (1 - x);
+
+function sigmoidDerivada(x){
+    return x * (1-x); 
 }
+
 class RedeNeural {
-    constructor(numNeuroniosEntrada, numNeuroniosOcultos, numNeuroniosSaida) {
-        this.numNeuroniosEntrada = numNeuroniosEntrada;
-        this.numNeuroniosOcultos = numNeuroniosOcultos;
-        this.numNeuroniosSaida = numNeuroniosSaida;
+    constructor(neuroniosEntrada, neuroniosOcultos, neuroniosSaida) {
+        this.neuroniosEntrada = neuroniosEntrada;
+        this.neuroniosOcultos = neuroniosOcultos;
+        this.neuroniosSaida = neuroniosSaida;
 
-        this.biasEntradaToOculta = new Matriz(this.numNeuroniosOcultos, 1);
-        this.biasEntradaToOculta.randomizarValores();
-        this.biasOcultaToSaida = new Matriz(this.numNeuroniosSaida, 1);
-        this.biasOcultaToSaida.randomizarValores();
+        this.biasEntradaOculta = new Matriz(this.neuroniosOcultos, 1);
+        this.biasEntradaOculta.aleatorizar();
+        this.biasOcultaSaida = new Matriz(this.neuroniosSaida, 1);
+        this.biasOcultaSaida.aleatorizar();
 
-        this.pessosEntradaToOculta = new Matriz(this.numNeuroniosOcultos, this.numNeuroniosEntrada);
-        this.pessosEntradaToOculta.randomizarValores();
+        this.pesosEntradaOculta = new Matriz(this.neuroniosOcultos, this.neuroniosEntrada);
+        this.pesosEntradaOculta.aleatorizar()
 
-        this.pessosOcultaToSaida = new Matriz(this.numNeuroniosSaida, this.numNeuroniosOcultos);
-        this.pessosOcultaToSaida.randomizarValores();
+        this.pesosOcultaSaida = new Matriz(this.neuroniosSaida, this.neuroniosOcultos)
+        this.pesosOcultaSaida.aleatorizar()
+
         this.areaAprendizado = 0.1;
     }
 
-    treino(ArrayEntrada, alvo) {
-        let entrada = Matriz.arrayToMatriz(ArrayEntrada);
-        let camadaOculta = Matriz.multiplicar(this.pessosEntradaToOculta, entrada);
+    treino(arrayEntrada,arrayResposta) {
+        // INPUT -> HIDDEN
+        let entrada = Matriz.arrayToMatriz(arrayEntrada);
+        let oculta = Matriz.multiplicar(this.pesosEntradaOculta, entrada);
+        oculta = Matriz.adicionar(oculta, this.biasEntradaOculta);
 
-        camadaOculta = Matriz.adicionar(camadaOculta, this.biasEntradaToOculta);
-        camadaOculta.mapear(sigmoid);
+        oculta.mapear(sigmoid)
 
-        let camadaSaida = Matriz.multiplicar(this.pessosOcultaToSaida, camadaOculta);
-        camadaSaida = Matriz.adicionar(camadaSaida, this.biasOcultaToSaida);
-        camadaSaida.mapear(sigmoid);
+        // HIDDEN -> OUTPUT
+        // d(Sigmoid) = Output * (1- Output)
+        let saida = Matriz.multiplicar(this.pesosOcultaSaida, oculta);
+        saida = Matriz.adicionar(saida, this.biasOcultaSaida);
+        saida.mapear(sigmoid);
 
-        let esperado = Matriz.arrayToMatriz(alvo);
-        let erroSaida = Matriz.subtrair(esperado, camadaSaida);
-        let derivadaSaida = Matriz.mapear(camadaSaida, derivadaSigmoid);
+        // BACKPROPAGATION
 
-        let camadaOcultaTransposta = Matriz.transpose(camadaOculta);
+        // OUTPUT -> HIDDEN
+        let expectativa = Matriz.arrayToMatriz(arrayResposta);
+        let erroSaida = Matriz.subtrair(expectativa,saida);
+        let saidaDerivada = Matriz.mapear(saida,sigmoidDerivada);
+        let ocultaTransposta = Matriz.transpor(oculta);
 
-        let gradiente = Matriz.hadamard(erroSaida, derivadaSaida);
+        let gradienteEntrada = Matriz.hadamard(saidaDerivada,erroSaida);
+        gradienteEntrada = Matriz.escalarMultiplicar(gradienteEntrada,this.areaAprendizado);
+        
+        // Adjust Bias O->H
+        this.biasOcultaSaida = Matriz.adicionar(this.biasOcultaSaida, gradienteEntrada);
+        // Adjust Weigths O->H
+        let pesosOcultaSaidaDeltas = Matriz.multiplicar(gradienteEntrada,ocultaTransposta);
+        this.pesosOcultaSaida = Matriz.adicionar(this.pesosOcultaSaida,pesosOcultaSaidaDeltas);
 
-        gradiente = Matriz.escalarMultiplicar(gradiente, this.areaAprendizado);
-        this.biasOcultaToSaida = Matriz.adicionar(this.biasOcultaToSaida, gradiente);
+        // HIDDEN -> INPUT
+        let pesosOcultaSaidaTransposto = Matriz.transpor(this.pesosOcultaSaida);
+        let erroOculta = Matriz.multiplicar(pesosOcultaSaidaTransposto,erroSaida);
+        let ocultaDerivada = Matriz.mapear(oculta,sigmoidDerivada);
+        let entradaTransposta = Matriz.transpor(entrada);
 
-        let pessosOcultaToSaidaDeltas = Matriz.multiplicar(gradiente, camadaOcultaTransposta);
-
-        this.pessosOcultaToSaida = Matriz.adicionar(this.pessosOcultaToSaida, pessosOcultaToSaidaDeltas);
-
-        let pessosEntradaToOcultaTransposto = Matriz.transpose(this.pessosOcultaToSaida);
-
-        let erroOculta = Matriz.multiplicar(pessosEntradaToOcultaTransposto, erroSaida);
-        let derivadaOculta = Matriz.mapear(camadaOculta, derivadaSigmoid);
-        let entradaTransposta = Matriz.transpose(entrada);
-
-        let gradienteOculta = Matriz.hadamard(erroOculta, derivadaOculta);
-
+        let gradienteOculta = Matriz.hadamard(ocultaDerivada,erroOculta);
         gradienteOculta = Matriz.escalarMultiplicar(gradienteOculta, this.areaAprendizado);
-        this.biasEntradaToOculta = Matriz.adicionar(this.biasEntradaToOculta, gradienteOculta);
 
-        let pessosEntradaToOcultaDelta = Matriz.multiplicar(gradienteOculta, entradaTransposta);
-
-        this.pessosEntradaToOculta = Matriz.adicionar(this.pessosEntradaToOculta, pessosEntradaToOcultaDelta);
-
+        // Adjust Bias O->H
+        this.biasEntradaOculta = Matriz.adicionar(this.biasEntradaOculta, gradienteOculta);
+        // Adjust Weigths H->I
+        let pesosEntradaOculta_deltas = Matriz.multiplicar(gradienteOculta, entradaTransposta);
+        this.pesosEntradaOculta = Matriz.adicionar(this.pesosEntradaOculta, pesosEntradaOculta_deltas);
     }
-    predict(ArrayEntrada) {
-        let entrada = Matriz.arrayToMatriz(ArrayEntrada);
-        let camadaOculta = Matriz.multiplicar(this.pessosEntradaToOculta, entrada);
-        camadaOculta = Matriz.adicionar(camadaOculta, this.biasEntradaToOculta);
-        camadaOculta.mapear(sigmoid);
 
-        let camadaSaida = Matriz.multiplicar(this.pessosOcultaToSaida, camadaOculta);
-        camadaSaida = Matriz.adicionar(camadaSaida, this.biasOcultaToSaida);
-        camadaSaida.mapear(sigmoid);
+    predict(arrayEntrada){
+        // INPUT -> HIDDEN
+        let entrada = Matriz.arrayToMatriz(arrayEntrada);
 
-        camadaSaida = Matriz.MatrizToArray(camadaSaida);
-        return camadaSaida;
+        let oculta = Matriz.multiplicar(this.pesosEntradaOculta, entrada);
+        oculta = Matriz.adicionar(oculta, this.biasEntradaOculta);
+
+        oculta.mapear(sigmoid)
+
+        // HIDDEN -> OUTPUT
+        let saida = Matriz.multiplicar(this.pesosOcultaSaida, oculta);
+        saida = Matriz.adicionar(saida, this.biasOcultaSaida);
+        saida.mapear(sigmoid);
+        saida = Matriz.MatrizToArray(saida);
+
+        return saida;
     }
 }

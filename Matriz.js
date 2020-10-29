@@ -16,7 +16,7 @@ class Matriz {
     static mapear(matriz1, funcao) {
         let matriz = new Matriz(matriz1.linhas, matriz1.colunas);
 
-        matriz.conteudo = matriz.conteudo.map((array, i) => {
+        matriz.conteudo = matriz1.conteudo.map((array, i) => {
             return array.map((numero, j) => {
                 return funcao(numero, i, j);
             })
@@ -36,57 +36,53 @@ class Matriz {
     static hadamard(matriz1, matriz2) {
         var matriz = new Matriz(matriz1.linhas, matriz1.colunas);
 
-        matriz.mapear((elemento, i, j) => {
+        matriz.mapear((numero, i, j) => {
             return matriz1.conteudo[i][j] * matriz2.conteudo[i][j];
         });
-
-        return matriz
+        return matriz;
     }
 
     static escalarMultiplicar(matriz1, escalar) {
         var matriz = new Matriz(matriz1.linhas, matriz1.colunas);
 
-        matriz.mapear((elemento, i, j) => {
+        matriz.mapear((numero, i, j) => {
             return matriz1.conteudo[i][j] * escalar;
         });
-
-        return matriz
+        return matriz;
     }
 
-    static transpose(matriz1) {
+    static transpor(matriz1) {
         var matriz = new Matriz(matriz1.colunas, matriz1.linhas);
-
-        matriz.mapear((elemento, i, j) => {
+        matriz.mapear((numero, i, j) => {
             return matriz1.conteudo[j][i];
         });
-
         return matriz;
     }
 
     static subtrair(matriz1, matriz2) {
         var matriz = new Matriz(matriz1.linhas, matriz1.colunas);
 
-        matriz.mapear((elemento, i, j) => {
-            return matriz1.conteudo[i][j] - matriz2.conteudo[i][j];
+        matriz.mapear((numero, i, j) => {
+            return matriz1.conteudo[i][j] - matriz2.conteudo[i][j]
         });
 
-        return matriz
+        return matriz;
     }
 
     static adicionar(matriz1, matriz2) {
         var matriz = new Matriz(matriz1.linhas, matriz1.colunas);
 
-        matriz.mapear((elemento, i, j) => {
-            return matriz1.conteudo[i][j] + matriz2.conteudo[i][j];
+        matriz.mapear((numero, i, j) => {
+            return matriz1.conteudo[i][j] + matriz2.conteudo[i][j]
         });
 
-        return matriz
+        return matriz;
     }
 
     static multiplicar(matriz1, matriz2) {
         var matriz = new Matriz(matriz1.linhas, matriz2.colunas);
 
-        matriz.mapear((elemento, i, j) => {
+        matriz.mapear((numero, i, j) => {
             let soma = 0
             for (let k = 0; k < matriz1.colunas; k++) {
                 let valorMatriz1 = matriz1.conteudo[i][k];
@@ -99,20 +95,14 @@ class Matriz {
         return matriz
     }
 
-    randomizarValores() {
+    aleatorizar() {
         this.mapear((elemento, i, j) => {
-            return Math.floor(Math.random() * 10);
+            return Math.random() * 2 - 1;
         });
-        return this;
-    }
-
-    print() {
-        console.log(this)
-        console.table(this.conteudo)
     }
 
     static arrayToMatriz(array) {
-        let matriz = new Matriz(array.length, 1)
+        let matriz = new Matriz(array.length, 1);
         matriz.mapear((elemento, i, j) => {
             return array[i];
         });
