@@ -2,16 +2,11 @@
 
 # Curso feito no Alura
 ## machine-learning-introducao-a-classificacao-com-sklearn
-- `introcucao_a_machine_learning_arvore_decisao.ipynb`
 - `introcucao_a_machine_learning_arvore_decisao.py`
-- `introducao_a_machine_learning_classificacao.ipynb`
 - `introducao_a_machine_learning_classificacao.py`
-- `introducao_a_machine_learning_dimensionalidade_baseline.ipynb`
 - `introducao_a_machine_learning_dimensionalidade_baseline.py`
-- `introducao_a_machine_learning.ipynb`
 - `introducao_a_machine_learning.py`
 ## machine-learning-algoritmos-nao-supervisionados
-- `Machine_Learning_Introdução_a_algoritmos_não_supervisionados.ipynb`
 - `Machine_Learning_Introdução_a_algoritmos_não_supervisionados.py`
 
 # Curso feito no Youtube
