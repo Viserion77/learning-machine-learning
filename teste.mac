@@ -1,0 +1,6 @@
+CreateAndSaveIaParameters   ;
+    ....
+    quit $$$OK
+    ;
+ExecuteLogicToTraining  ;
+    ; fazer um for de 4 em um loop de 100kk e neste fazer validações de direção baseados em dados randomicos
