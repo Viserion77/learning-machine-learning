@@ -3,7 +3,7 @@ from tensorflow import keras
 
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
-from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
+from keras.wrappers.scikit_learn import KerasClassifier
 from sklearn.model_selection import cross_val_score
 
 previsores = pd.read_csv('/workspaces/learning-machine-learning/udemy/a_z/breast_cancer_wisconsin_diagnostic/entradas_breast.csv')
